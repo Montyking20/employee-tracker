@@ -12,7 +12,7 @@ const db = mysql.createConnection(
   })
 db.connect(function (err) {
   if (err) throw err;
-  console.log(`Connected to the employeetracker_db database.`)
+  console.log(`Connected to the database.`)
   callDepartments()
   callRoles()
   callManagers() 
@@ -20,7 +20,7 @@ db.connect(function (err) {
   startmenu()
 })
 
-const interfaceQuestion = [{
+let mainQuestion = [{
   type: "list",
   message: "What would you like to do?",
   name: "choice",
@@ -33,24 +33,25 @@ const interfaceQuestion = [{
     "Add Department",
     "Quit"]
 }]
-const addDepartmentQuestion = [{
+
+let departmentQuestion = [{
   type: "input",
   message: "What is this new department called?",
   name: "DeptName"
 }]
 
-let deptArr = []
+let deptArr =[]
 function callDepartments(){
   db.query('SELECT * FROM department;', function (err, data){
     //Array loop for departments.
     for (let i = 0; i < data.length; i++) {
-      const objects = data[i];
+      let objects = data[i];
       deptArr.push(objects.name)
     }
   })
 }
 
-const addRoleQuestions = [
+let roleQuestions = [
   {
     type: "input",
     message: "What is this new role called?",
@@ -67,28 +68,28 @@ const addRoleQuestions = [
   }
 ]
 
-const rolesArr = []
+let rolesArr = []
 function callRoles(){
   db.query('SELECT * FROM role', function(err, data){
     //Array loop of roles.
     for (let i = 0; i < data.length; i++) {
-      const objects = data[i];
+      let objects = data[i];
       rolesArr.push(objects.title)
     }
   })
 }
 
-const managerArr = []
+let managerArr = []
 function callManagers(){
   db.query('SELECT CONCAT(employee.first_name," ", employee.last_name) AS fullName FROM employee WHERE manager_id IS NULL;', function(err, data){
     for (let i = 0; i < array.length; i++) {
-      const objects = data[i];
+      let objects = data[i];
       managerArr.push(objects.fullName)
     }
   })
 }
 
-const addEmployeeQuestions = [
+let employeeQuestions = [
   {
     type: "input",
     message: "What is the new employee's first name?",
@@ -109,18 +110,18 @@ const addEmployeeQuestions = [
     choices: managerArr
   }
 ]
-const employeeArr = []
+let employeeArr = []
 function callEmployees() {
   db.query('SELECT employee.first_name AS Name FROM employee;', function(err, data){
     if(err)throw err;
     for (let i = 0; i < array.length; i++) {
-      const Empobjects = data[i];
+      let Empobjects = data[i];
       employeeArr.push(Empobjects.Name)
     }
   })
 }
 
-const updateEmployeeQuestions = [
+let updateEmployeeQuestions = [
   {
     type: "list",
     message: "Which employee are you updating?",
@@ -135,7 +136,7 @@ const updateEmployeeQuestions = [
 ]
 
 function startmenu(){
-  inquirer.prompt(interfaceQuestion)
+  inquirer.prompt(mainQuestion)
   .then(function(response){
     switch(response.choice){
       case "View All Employees":
@@ -191,7 +192,7 @@ function viewAllDepts(){
 };
 
 function addDept(){
-  inquirer.prompt(addDepartmentQuestion)
+  inquirer.prompt(departmentQuestion)
   .then(function(response){
     db.query('INSERT INTO department (department_name) VALUES (?);',
     response.DeptName,
@@ -204,7 +205,7 @@ function addDept(){
 
 function addRole() {
   callDepartments()
-  inquirer.prompt(addRoleQuestions)
+  inquirer.prompt(roleQuestions)
   .then(function(response) {
     let deptID = deptArr.indexOf(response.RoleDept) + 1;
     db.query('INSERT INTO role (title, salary, department_id) VALUES (?,?,?);',
@@ -221,7 +222,7 @@ function addRole() {
 function addEmployee() {
   callRoles()
   callManagers()
-  inquirer.prompt(addEmployeeQuestions)
+  inquirer.prompt(employeeQuestions)
   .then(function (response) {
     let roleID = rolesArr.indexOf(response.empRole) + 1;
     let managerID = managerArr.indexOf(response.empManager) +1
@@ -243,10 +244,10 @@ function updateEmployeeRole() {
   inquirer.prompt(updateEmployeeQuestions)
   .then(function(resonse){
     console.log(resonse.newRole)
-    console.log(resonse.Updatee)
+    console.log(resonse.UpdateE)
     let roleID = rolesArr.indexOf(resonse.newRole) + 1;
     console.log(roleID)
-    db.query(`UPDATE employee SET role_id = ${roleID} WHERE employee.first_name = '${response.Updatee}'`, function
+    db.query(`UPDATE employee SET role_id = ${roleID} WHERE employee.first_name = '${response.UpdateE}'`, function
     (err, data){
       if(err)throw err
       startmenu()
