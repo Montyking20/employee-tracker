@@ -1,123 +1,255 @@
-const express = require('express');
+//imports and requires
+require("console.table")
 const mysql = require('mysql2');
+const inquirer = require('inquirer')
 
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express Middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Connect to DB
 const db = mysql.createConnection(
-    {
+  {
     host: 'localhost',
     user: 'root',
-    password: 'DUBootcamp2021!!',
-    database: 'movie_db'
-    },
-    console.log(`Connected to the movie_db database.`)
-);
+    password: 'rootroot',
+    database: 'employeetracker_db'
+  })
+db.connect(function (err) {
+  if (err) throw err;
+  console.log(`Connected to the employeetracker_db database.`)
+  callDepartments()
+  callRoles()
+  callManagers() 
+  callEmployees()
+  startmenu()
+})
 
-// Add a movie
-app.post('/api/new-movie', ({ body }, res) => {
-    const sql = 'INSERT INTO movies (movie_name) VALUES=(?)';
-    const params = [body.movie_name];
-  
-    db.query(sql, params, (err, result) => {
-        if(err){
-           res.status(400).json({
-           error: err.message });
-        return;   
-        }
-        res.json({
-            message: 'success',
-            data:body,
-        });
-    });
-});
+const interfaceQuestion = [{
+  type: "list",
+  message: "What would you like to do?",
+  name: "choice",
+  choices: ["View All Employees",
+    "Add Employee",
+    "Update Employee Role",
+    "View All Roles",
+    "Add Role",
+    "View All Departments",
+    "Add Department",
+    "Quit"]
+}]
+const addDepartmentQuestion = [{
+  type: "input",
+  message: "What is this new department called?",
+  name: "DeptName"
+}]
 
-// Read all movies
-app.get('/api/movies', (req, res) => {
-    const sql = 'SELECT id, movie_name AS title FROM movies';
-  
-    db.query(sql, function (err,rows) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        return;
-        }
-        res.json({
-            message: 'success',
-            data: rows,
-        });
-    });
-});
-
-// Delete movie from DB
-app.delete('/api/movies:id', (req, res) => {
-    const sql = 'DELETE FROM movies WHERE id = ?';
-    const params = [req.params.id];
-
-    db.query(sql, params, (err, result) => {
-        if (err) {
-            res.statusMessage(400).json({ error: err.message });
-    }   else if (!result.affectedRows) {
-            res.json({
-            message: 'Movie not found', 
-            });
-    }   else {
-            res.json({
-                message: 'deleted',
-                changes: result.affectedRows,
-                id: req.params.id,
-            });
-        }
-    });
-});
-
-// Read list of all reviews and associated movie name using LEFT JOIN
-app.get('/api/movies-reviews', (req,res) => {
-    const sql = 'SELECT movies.movie_name AS movie, reviews.review FROM reviews LEFT JOIN movies ON reviews.movie_id = movies.id ORDER BY movies.movie_name;';
-  
-    db.query(sql, function (err,rows) {
-        if (err) {
-            res.status(500).json({ error: err.message });
-        return;
+let deptArr = []
+function callDepartments(){
+  db.query('SELECT * FROM department;', function (err, data){
+    //Array loop for departments.
+    for (let i = 0; i < data.length; i++) {
+      const objects = data[i];
+      deptArr.push(objects.name)
     }
-        res.json({
-            message: 'success',
-            data: rows,
-        });
-    });
-});
+  })
+}
 
-// Update review name
-app.put('/api/review/:id', (req, res) => {
-    const sql = 'UPDATE reviews SET review = ? WHERE id = ?';
-    const params = [req.body.review, req.params.id];
+const addRoleQuestions = [
+  {
+    type: "input",
+    message: "What is this new role called?",
+    name: "RoleName"
+  }, {
+    type: "input",
+    message: "What is the new role's salary?",
+    name: "RoleSalary"
+  }, {
+    type: "list",
+    message: "What department is this role in?",
+    name: "RoleDept",
+    choices: deptArr
+  }
+]
 
-    db.query(sql, params, (err, result) => {
-        if(err){
-           res.status(400).json({ error: err.message });
-    }   else if (!result.affectedRows) {
-            res.json({
-            message: 'Movie not found', 
-            });
-    }   else {
-            res.json({
-                message: 'success',
-                data: req.body,
-                changes: result.affectedRows,
-            });
-        }
-    });
-});
+const rolesArr = []
+function callRoles(){
+  db.query('SELECT * FROM role', function(err, data){
+    //Array loop of roles.
+    for (let i = 0; i < data.length; i++) {
+      const objects = data[i];
+      rolesArr.push(objects.title)
+    }
+  })
+}
 
- // Default response for any other request (Not Found)
-app.use((req, res) => {
-    res.status(404).end();
-  });
-  
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+const managerArr = []
+function callManagers(){
+  db.query('SELECT CONCAT(employee.first_name," ", employee.last_name) AS fullName FROM employee WHERE manager_id IS NULL;', function(err, data){
+    for (let i = 0; i < array.length; i++) {
+      const objects = data[i];
+      managerArr.push(objects.fullName)
+    }
+  })
+}
+
+const addEmployeeQuestions = [
+  {
+    type: "input",
+    message: "What is the new employee's first name?",
+    name: "firstName"
+  }, {
+    type: "input",
+    message: "What is the new employee's last name?",
+    name: "lastName"
+  }, {
+    type: "list",
+    message: "What is their role?",
+    name: "empRole",
+    choices: rolesArr
+  }, {
+    type: "list",
+    message: "Who is their manager?",
+    name: "empManager",
+    choices: managerArr
+  }
+]
+const employeeArr = []
+function callEmployees() {
+  db.query('SELECT employee.first_name AS Name FROM employee;', function(err, data){
+    if(err)throw err;
+    for (let i = 0; i < array.length; i++) {
+      const Empobjects = data[i];
+      employeeArr.push(Empobjects.Name)
+    }
+  })
+}
+
+const updateEmployeeQuestions = [
+  {
+    type: "list",
+    message: "Which employee are you updating?",
+    name: "UpdateE",
+    choices: employeeArr
+  },{
+    type: "list",
+    message: "What is their new role?",
+    name: "newRole",
+    choices: rolesArr
+  }
+]
+
+function startmenu(){
+  inquirer.prompt(interfaceQuestion)
+  .then(function(response){
+    switch(response.choice){
+      case "View All Employees":
+        viewAllEmployees()
+        break;
+      case "Add Employee":
+        addEmployee()
+        break;
+      case "Update Employee Role":
+        updateEmployeeRole()
+        break;
+      case "View All Roles":
+        viewAllRoles()
+        break;
+        case "Add Role":
+          addRole()
+          break;
+      case "View All Departments":
+        viewAllDepts()
+        break;
+      case "Add Department":
+        addDept()
+        break;
+      default:
+        db.end()
+        process.exit(0)
+    }
+  })
+}
+
+function viewAllEmployees(){
+  db.query('SELECT employee.first_name as Fname, employee.last_name AS Lname, roles.title AS Role, employee.id, CONCAT (manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN employee manager ON manager.id = employee.manager_id JOIN roles ON roles.id = employee.roles_id;', function(err,data){
+    if(err)throw err
+    console.table(data)
+    startmenu()
+  })
+};
+
+function viewAllRoles(){
+  db.query('SELECT department.department_name, role.title, role.salary FROM role JOIN department ON role.department_id = department_id;', function(err,data){
+    if(err)throw err
+    console.table(data)
+    startmenu()
+  })
+};
+
+function viewAllDepts(){
+  db.query('SELECT * FROM department;', function(err,data){
+    if(err)throw err
+    console.table(data)
+    startmenu()
+  })
+};
+
+function addDept(){
+  inquirer.prompt(addDepartmentQuestion)
+  .then(function(response){
+    db.query('INSERT INTO department (department_name) VALUES (?);',
+    response.DeptName,
+     function(err,data){
+      if(err)throw err
+      startmenu()
+    })
+  })
+}
+
+function addRole() {
+  callDepartments()
+  inquirer.prompt(addRoleQuestions)
+  .then(function(response) {
+    let deptID = deptArr.indexOf(response.RoleDept) + 1;
+    db.query('INSERT INTO role (title, salary, department_id) VALUES (?,?,?);',
+    [resonse.RoleName,
+     response.RoleSalary,
+     deptID],
+      function(err,data){
+        if(err)throw err
+        startmenu()
+      })
+  })
+}
+
+function addEmployee() {
+  callRoles()
+  callManagers()
+  inquirer.prompt(addEmployeeQuestions)
+  .then(function (response) {
+    let roleID = rolesArr.indexOf(response.empRole) + 1;
+    let managerID = managerArr.indexOf(response.empManager) +1
+    db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?);'
+    [response.firstName,
+     response.lastName,
+     roleID,
+     managerID],
+      function(err,data){
+        if(err)throw err
+        startmenu()
+    })
+  })
+}
+
+function updateEmployeeRole() {
+  callRoles()
+  callEmployees()
+  inquirer.prompt(updateEmployeeQuestions)
+  .then(function(resonse){
+    console.log(resonse.newRole)
+    console.log(resonse.Updatee)
+    let roleID = rolesArr.indexOf(resonse.newRole) + 1;
+    console.log(roleID)
+    db.query(`UPDATE employee SET role_id = ${roleID} WHERE employee.first_name = '${response.Updatee}'`, function
+    (err, data){
+      if(err)throw err
+      startmenu()
+    })
+  })
+}
