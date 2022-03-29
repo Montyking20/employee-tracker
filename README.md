@@ -33,9 +33,9 @@
 
 ---
 
-<br>
-
 ## About 
+
+<br>
 
 This class project is to create a CLI tool with Node.js that displays general employee data with a MySQL DB.
 
@@ -56,29 +56,37 @@ This class project is to create a CLI tool with Node.js that displays general em
 
 ---
 
-<br>
 
 ## Installation
 
+<br>
+
 1. Clone this repo 
+
 ```sh
 git clone git@github.com/Montyking20/employee-tracker.git
 ```
+
 2. Install NPM packages
    ```sh
-   cd du-employee-tracker-proj-10 && npm install
+   cd employee-tracker && npm install
    ```
-3. Ensure mysql service is running
-4. Update the MySQL password to your own in the {{this project repo folder}}/db/db_handler.js file
 
+3. Ensure mysql service is running
+
+4. Update the MySQL password to your own at the top of the server.js page.
+
+<br>
 
 ### Usage
 
 Once installed run `npm start` and follow the interactive command prompts. The update fields are ID bases so ensure to enter the correct employee ID and role ID.
 
+<br>
+
 ### Repo 
 
-### [Repo Note Taker](https://github.com/Montyking20/employee-tracker)
+### [Repo Employee-Tracker](https://github.com/Montyking20/employee-tracker)
 
 <br>
 
@@ -88,7 +96,9 @@ Once installed run `npm start` and follow the interactive command prompts. The u
 
 ## What it looked like
 
-![Screen Shot of CLI Menu](./img.png)
+<br>
+
+![Screen Shot of CLI Menu](./assets/Screenshot-main.jpg)
 
 
 
